@@ -1,6 +1,7 @@
 # refactoring https://github.com/nicoring/hippocampus-predictive-map for me
 
 # load libray
+import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -58,82 +59,81 @@ def choose_action(state, prefered = True):
     return action
 
 # for matrix M
-def state_to_idx(state, s_prime, next_state, all_states):
+def state_to_idx(state, next_state, all_states):
     for idx in range(len(all_states)):
         if all_states[idx] == state:
-            idx_state = idx
-    for idx in range(len(all_states)):
-        if all_states[idx] == s_prime:
-            idx_s_prime = idx    
+            idx_state = idx  
     for idx in range(len(all_states)):
         if all_states[idx] == next_state:
             idx_next_state = idx        
-    
-    return idx_state, idx_s_prime, idx_next_state
+    return idx_state, idx_next_state
 
 
-def update_SR_matrix(state, s_prime, next_state, I, next_sr_matrix,\
-    all_states, alpha = alpha, gamma = gamma):
-    idx_state, idx_s_prime, idx_next_state = \
-        state_to_idx(state, s_prime, next_state, all_states)
-    M_element = next_sr_matrix[idx_state, idx_s_prime]
-    M_next_state_element = next_sr_matrix[idx_next_state, idx_s_prime]
-    new_M_element = M_element + alpha * (I + gamma * M_next_state_element - \
-        M_element)
-    next_sr_matrix[idx_state, idx_s_prime] = new_M_element
-    if idx_state == idx_s_prime:
-        next_sr_matrix[idx_state, idx_s_prime] = 1
-    return next_sr_matrix  
-
-
-
-    
-
-# r = np.array([[0,0,0,0,1]])
+def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = alpha, \
+    gamma = gamma):
+    idx_state, idx_next_state = state_to_idx(state, next_state, all_states)
+    I = np.zeros(sr_matrix[0, :].shape)
+    I[idx_state] = 1
+    M_state_V = sr_matrix[idx_state, :]
+    M_next_state_V = sr_matrix[idx_next_state, :]
+    sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
+        gamma * M_next_state_V - M_state_V)
+    sr_matrix[idx_state, idx_state] = 1
+    return sr_matrix  
 
 # prepare for SR matrix
-values = np.zeros(maze.shape, dtype=np.float)
-visited = np.zeros(maze.shape)
 all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
-# 여기서 state란 좌표를 의미한다. 꼭 좌표로 받아야 하나?
-# all_states = [np.array(s) for s in it.product(range(maze.shape[0], \
-#    range(maze.shapes[1])))]
 
-n_states = maze.shape[0] * maze.shape[1]
 sr_matrix = np.eye(len(all_states), dtype=np.float)
 
+history_sr_matrix = []
 
-s = None
+history_exp_idx = 0
 
-
-
-next_sr_matrix = sr_matrix.copy()
-
-for i in tqdm(range(1000)):
+for i in tqdm(range(10001)):
     state = START
+    if i == 0: 
+        history_sr_matrix.append(copy.deepcopy(sr_matrix[:, len(all_states)-1]))
+    
     while state != END:
         action = choose_action(state, prefered=True)
         next_state, _ = step(state, action)
-        visited[next_state[0], next_state[1]] += 1.0
-        for s_prime in all_states:
-            I = 1 if state == s_prime else 0
-            next_sr_matrix = update_SR_matrix(state, s_prime, next_state, I, \
-                next_sr_matrix, all_states)
+        sr_matrix = update_SR_matrix(state, next_state, sr_matrix, all_states)
 
-        state = next_state  
-def figure():  
+        state = next_state
+
+    if i == (10 ** history_exp_idx):
+       history_sr_matrix.append(copy.deepcopy(sr_matrix[:, len(all_states)-1]))
+       history_exp_idx += 1
+    
+ 
+def figure_matrix():  
     fig, ax = plt.subplots() 
-    im = ax.imshow(next_sr_matrix, cmap='gray', interpolation='nearest')
-    for idx in range(next_sr_matrix.shape[0]):
-        for jdx in range(next_sr_matrix.shape[1]):
-            text = ax.text(jdx, idx,round(next_sr_matrix[idx, jdx],2), \
+    ax.imshow(sr_matrix, cmap='gray', interpolation='nearest')
+    '''
+    for idx in range(sr_matrix.shape[0]):
+        for jdx in range(sr_matrix.shape[1]):
+            text = ax.text(jdx, idx,round(sr_matrix[idx, jdx],2), \
                 ha = "center", va = "center", color = "b")
-            
+    '''        
     fig.tight_layout()
-    plt.savefig('./images/sr_matrix_10.png')
+    plt.savefig('./images/sr_matrix_' + str(MAZE_LENGTH) + '.png')
     plt.close()
 
+def figure_history():
+    for_legend = []
+    for idx in range(len(history_sr_matrix)):
+        plt.plot(history_sr_matrix[idx])
+        if idx == 0:
+            for_legend.append("init")
+        else:
+            for_legend.append("10^"+str(idx-1))
+    plt.legend(for_legend, loc = 'upper left')
+    plt.savefig('./images/sr_histroy_' + str(MAZE_LENGTH) + '.png')
+
+
 if __name__=='__main__':
-    figure()
+    figure_matrix()
+    figure_history()
 
 
