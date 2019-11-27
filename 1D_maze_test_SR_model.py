@@ -5,17 +5,16 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import mazemaking as mm
+import sr
 
 # simple 1D maze with prefered direction or random policy
 
 # maze env
 
-def make_1D(length):
-    return np.ones((1, length))
-
 MAZE_LENGTH = 10
 
-maze = make_1D(MAZE_LENGTH)
+maze = mm.make_1D(MAZE_LENGTH)
 
 # action on 1D maze
 ACTION_LT = 0
@@ -58,28 +57,7 @@ def choose_action(state, prefered = True):
         assert False
     return action
 
-# for matrix M
-def state_to_idx(state, next_state, all_states):
-    for idx in range(len(all_states)):
-        if all_states[idx] == state:
-            idx_state = idx  
-    for idx in range(len(all_states)):
-        if all_states[idx] == next_state:
-            idx_next_state = idx        
-    return idx_state, idx_next_state
 
-
-def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = alpha, \
-    gamma = gamma):
-    idx_state, idx_next_state = state_to_idx(state, next_state, all_states)
-    I = np.zeros(sr_matrix[0, :].shape)
-    I[idx_state] = 1
-    M_state_V = sr_matrix[idx_state, :]
-    M_next_state_V = sr_matrix[idx_next_state, :]
-    sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
-        gamma * M_next_state_V - M_state_V)
-    sr_matrix[idx_state, idx_state] = 1
-    return sr_matrix  
 
 # prepare for SR matrix
 all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
@@ -90,7 +68,7 @@ history_sr_matrix = []
 
 history_exp_idx = 0
 
-for i in tqdm(range(10001)):
+for i in tqdm(range(1001)):
     state = START
     if i == 0: 
         history_sr_matrix.append(copy.deepcopy(sr_matrix[:, len(all_states)-1]))
@@ -98,7 +76,8 @@ for i in tqdm(range(10001)):
     while state != END:
         action = choose_action(state, prefered=True)
         next_state, _ = step(state, action)
-        sr_matrix = update_SR_matrix(state, next_state, sr_matrix, all_states)
+        sr_matrix = sr.update_SR_matrix(state, next_state, sr_matrix, \
+             all_states, alpha = alpha, gamma = gamma)
 
         state = next_state
 
