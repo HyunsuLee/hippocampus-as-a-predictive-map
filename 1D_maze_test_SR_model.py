@@ -100,6 +100,9 @@ def figure_matrix():
     plt.close()
 
 def figure_history():
+    '''
+    원래 논문의 figure 2C에 해당됨.
+    '''
     for_legend = []
     for idx in range(len(history_sr_matrix)):
         plt.plot(history_sr_matrix[idx])
