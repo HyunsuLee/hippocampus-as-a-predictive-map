@@ -26,7 +26,7 @@ square_with_barrier = mm.make_barrier_maze_square(square_maze, \
     B_LENGTH, B_X_POSTION, B_Y_POSTION, B_THICKNESS)
 
 SR_CELL = int(((B_Y_POSTION + B_THICKNESS + 1) * MAZE_LENGTH) + \
-    ((B_X_POSTION + B_LENGTH) / 2))
+    ((MAZE_LENGTH / 2) - 1))
 
 # action on 2D maze
 ACTION_UP = 0
@@ -76,7 +76,7 @@ all_states = [[x, y] for x in range(square_with_barrier.shape[0]) \
 
 sr_matrix = np.eye(len(all_states), dtype=np.float)
 
-for i in tqdm(range(20)):
+for i in tqdm(range(1000)):
     state = START
     
     while state != END:
