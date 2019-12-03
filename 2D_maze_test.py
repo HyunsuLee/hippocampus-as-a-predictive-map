@@ -15,13 +15,18 @@ MAZE_LENGTH = 100
 square_maze = mm.square_maze(MAZE_LENGTH)
 
 # put barrier
-B_LENGTH = 40
+B_LENGTH = 60
+B_THICKNESS = 10
 B_X_POSTION = 20
-B_Y_POSTION = 40
-barriers = [[B_Y_POSTION, y] for y in range(B_X_POSTION, B_X_POSTION + B_LENGTH)]
+B_Y_POSTION = 60
+barriers = [[x, y] for x in range(B_Y_POSTION, B_Y_POSTION + B_THICKNESS) \
+     for y in range(B_X_POSTION, B_X_POSTION + B_LENGTH)]
 
 square_with_barrier = mm.make_barrier_maze_square(square_maze, \
-    B_LENGTH, B_X_POSTION, B_Y_POSTION)
+    B_LENGTH, B_X_POSTION, B_Y_POSTION, B_THICKNESS)
+
+SR_CELL = int(((B_Y_POSTION + B_THICKNESS) * MAZE_LENGTH) + \
+    ((B_X_POSTION + B_LENGTH) / 2))
 
 # action on 2D maze
 ACTION_UP = 0
@@ -86,7 +91,7 @@ sr_matrix = np.eye(len(all_states), dtype=np.float)
 # history_exp_idx = 0
 # 2D maze에서 history를 보는 것은 힘든 것 같다.
 
-for i in tqdm(range(10)):
+for i in tqdm(range(20)):
     state = START
     
     while state != END:
@@ -98,8 +103,11 @@ for i in tqdm(range(10)):
         state = next_state
 
 
-sr_point = copy.deepcopy(sr_matrix[:, 3050])
-    
+sr_point = copy.deepcopy(sr_matrix[:, SR_CELL])
+sr_point = sr_point.reshape(square_with_barrier.shape)
+
+sr_point_with_barrier = mm.make_barrier_maze_square(sr_point, \
+    B_LENGTH, B_X_POSTION, B_Y_POSTION, B_THICKNESS, for_sr = True)   
  
 def figure_matrix():  
     fig, ax = plt.subplots() 
@@ -116,8 +124,7 @@ def figure_matrix():
 
 def figure_sr_point():
     fig, ax = plt.subplots() 
-    ax.imshow(sr_point.reshape(square_maze.shape),\
-         cmap='gray', interpolation='nearest')
+    ax.imshow(sr_point_with_barrier, cmap='gray', interpolation='nearest')
     '''
     for idx in range(sr_matrix.shape[0]):
         for jdx in range(sr_matrix.shape[1]):

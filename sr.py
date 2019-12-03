@@ -20,5 +20,5 @@ def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = 0.1, \
     M_next_state_V = sr_matrix[idx_next_state, :]
     sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
         gamma * M_next_state_V - M_state_V)
-    sr_matrix[idx_state, idx_state] = 1
+    #sr_matrix[idx_state, idx_state] = 1
     return sr_matrix  
