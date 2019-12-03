@@ -17,6 +17,10 @@ import sr
 MAZE_LENGTH = 300 # p.8 of supplement, 
 
 SR_POINT = int(MAZE_LENGTH * 0.50)
+# set xlim for plot.
+X_LT = int(MAZE_LENGTH * 0.3)
+X_RT = int(MAZE_LENGTH * 0.7)
+
 
 maze = mm.make_1D(MAZE_LENGTH)
 
@@ -109,6 +113,7 @@ def figure_3b():
     for idx in range(len(bias_sr_matrix)):
         plt.plot(bias_sr_matrix[idx])
     plt.legend(for_legend, loc = 'upper left')
+    plt.xlim(X_LT, X_RT)
     # plt.savefig('./images/sr_histroy_' + str(MAZE_LENGTH) + '.png')
     plt.savefig('./images/figure3b.png')
 
