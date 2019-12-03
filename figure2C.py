@@ -13,7 +13,7 @@ import sr
 
 # maze env
 
-MAZE_LENGTH = 500 # p.8 of supplement, 
+MAZE_LENGTH = 50 # p.8 of supplement, 
 # the paper said that 500 states were used for 1D maze, it seems to be typo
 # 50 states shows similar results with the figure 2C.
 SR_POINT = int(MAZE_LENGTH * 0.75)
@@ -31,7 +31,7 @@ END = [0, MAZE_LENGTH - 1]
 
 # hyperparameter for updating SR matrix
 alpha = 0.1
-gamma = 0.084 # p.8 of supplement
+gamma = 0.84 # p.8 of supplement
 # the paper said that 0.084 gamma was used for 1D maze,
 # 0.84 gamma shows similar results. With smaller gamma, the sharper SR rate shows.
 
