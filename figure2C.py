@@ -13,7 +13,7 @@ import sr
 
 # maze env
 
-MAZE_LENGTH = 50 # p.8 of supplement, 
+MAZE_LENGTH = 500 # p.8 of supplement, 
 # the paper said that 500 states were used for 1D maze, it seems to be typo
 # 50 states shows similar results with the figure 2C.
 SR_POINT = int(MAZE_LENGTH * 0.75)
@@ -31,7 +31,7 @@ END = [0, MAZE_LENGTH - 1]
 
 # hyperparameter for updating SR matrix
 alpha = 0.1
-gamma = 0.84 # p.8 of supplement
+gamma = 0.084 # p.8 of supplement
 # the paper said that 0.084 gamma was used for 1D maze,
 # 0.84 gamma shows similar results. With smaller gamma, the sharper SR rate shows.
 
@@ -49,18 +49,6 @@ def step(state, action):
 
     return next_state, reward
 
-# action policy
-def choose_action(state, prefered = True):
-    if prefered == True:
-        action = np.random.binomial(1, 1)
-    elif prefered == False:
-        action = np.random.binomial(1, 0.5)
-    else:
-        assert False
-    return action
-
-
-
 # prepare for SR matrix
 all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
 
@@ -70,13 +58,13 @@ history_sr_matrix = []
 
 history_exp_idx = 0
 
-for i in tqdm(range(10001)):
+for i in tqdm(range(1001)):
     state = START
     if i == 0: 
         history_sr_matrix.append(copy.deepcopy(sr_matrix[:, SR_POINT]))
     
     while state != END:
-        action = choose_action(state, prefered=True)
+        action = ACTION_RT 
         next_state, _ = step(state, action)
         sr_matrix = sr.update_SR_matrix(state, next_state, sr_matrix, \
              all_states, alpha = alpha, gamma = gamma)
