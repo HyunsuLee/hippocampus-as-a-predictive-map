@@ -27,6 +27,8 @@ square_with_barrier = mm.make_barrier_maze_square(square_maze, \
 
 SR_CELL = int(((B_Y_POSTION + B_THICKNESS + 1) * MAZE_LENGTH) + \
     ((MAZE_LENGTH / 2) - 1))
+RT_SR_CELL = SR_CELL - 19
+LT_SR_CELL = SR_CELL + 20 
 
 # action on 2D maze
 ACTION_UP = 0
@@ -42,7 +44,7 @@ END = [MAZE_LENGTH - 1, MAZE_LENGTH - 1]
 
 # hyperparameter for updating SR matrix
 alpha = 0.1
-gamma = 0.13
+gamma = 0.99 # original parameter 0.13
 
 # make actions and receive reward
 def step(state, action):
@@ -76,8 +78,15 @@ all_states = [[x, y] for x in range(square_with_barrier.shape[0]) \
 
 sr_matrix = np.eye(len(all_states), dtype=np.float)
 
-for i in tqdm(range(1000)):
+history_sr_matrix = []
+
+history_exp_idx = 0
+
+for i in tqdm(range(1001)):
     state = START
+    if i == 0: 
+        history_sr_matrix.append(copy.deepcopy(sr_matrix[RT_SR_CELL:LT_SR_CELL,\
+            SR_CELL]))
     
     while state != END:
         action = choose_action(state)
@@ -86,6 +95,10 @@ for i in tqdm(range(1000)):
              all_states, alpha = alpha, gamma = gamma)
 
         state = next_state
+    if i == (10 ** history_exp_idx):
+        history_sr_matrix.append(copy.deepcopy(sr_matrix[RT_SR_CELL:LT_SR_CELL,\
+            SR_CELL]))
+        history_exp_idx += 1
 
 
 sr_point = copy.deepcopy(sr_matrix[:, SR_CELL])
@@ -98,11 +111,24 @@ def figure2c_2D():
     fig, ax = plt.subplots() 
     ax.imshow(sr_point_with_barrier, cmap='viridis', interpolation='nearest')
     fig.tight_layout()
-    plt.savefig('./images/figure2c_2D.png')
+    plt.savefig('./images/figure2c_2D_99.png')
     plt.close()
+
+
+def figure_history():
+    for_legend = []
+    for idx in range(len(history_sr_matrix)):
+        plt.plot(history_sr_matrix[idx])
+        if idx == 0:
+            for_legend.append("init")
+        else:
+            for_legend.append("10^"+str(idx-1))
+    plt.legend(for_legend, loc = 'upper left')
+    plt.savefig('./images/figure2c_2D_history.png')
 
 
 
 if __name__=='__main__':
-    figure2c_2D()
+    # figure2c_2D()
+    figure_history()
 
