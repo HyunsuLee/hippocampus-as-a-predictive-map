@@ -25,6 +25,40 @@ def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = 0.1, \
 
 # analytic compute SR with transition matrix
 
-def analytic_SR(maze, gamma):
+#def analytic_SR(maze, gamma):
     # make adjacency matrix A(s, s') = 1 (for direct move), 0 (not move)
-    
+
+def adj_matrix(maze, ACTION=[0,1]):
+    all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
+    adj_matrix = np.zeros((len(all_states), len(all_states)))
+
+    for state in all_states:
+        i, j = state
+        if maze[i, j] == 0:
+            pass
+        else:
+            for action in ACTION:
+                next_state = step(state, action) # TODO refator step function 
+                i_prime, j_prime = next_state
+                if maze[i_prime, j_prime] == 0:
+                    pass
+                else:
+                    idx_state, idx_next_state = state_to_idx(state, next_state, all_states)
+                    adj_matrix[idx_state, idx_next_state] = 1
+    return adj_matrix/sum(adj_matrix)
+
+
+def step(state, action):
+    i, j = state
+    if action == 0:
+        next_state = [i, max(j - 1, 0)]
+    elif action == 1:
+        next_state = [i, min(j + 1, 10 - 1)]
+    else:
+        assert False
+    return next_state
+
+maze = np.array([[1,1,1,1,1,1,1,1,1,1]])
+
+print(adj_matrix(maze))
+
