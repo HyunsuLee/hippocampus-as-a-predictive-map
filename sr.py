@@ -21,4 +21,10 @@ def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = 0.1, \
     sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
         gamma * M_next_state_V - M_state_V)
     #sr_matrix[idx_state, idx_state] = 1
-    return sr_matrix  
+    return sr_matrix
+
+# analytic compute SR with transition matrix
+
+def analytic_SR(maze, gamma):
+    # make adjacency matrix A(s, s') = 1 (for direct move), 0 (not move)
+    
