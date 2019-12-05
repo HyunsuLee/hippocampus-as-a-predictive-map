@@ -3,10 +3,7 @@
 # analytic compute SR matrix from Transitional matrix.
 
 # load libray
-import copy
-import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import mazemaking as mm
 import sr
 
@@ -20,7 +17,7 @@ gamma = 0.84
 maze = mm.Maze(x_length = MAZE_LENGTH)
 dmaze = maze.make_1D()
 
-random_trans_mat= sr.transition_matrix(dmaze, maze.step_1D, policy=True)
+random_trans_mat= sr.transition_matrix(dmaze, maze.step_1D, policy="RT")
 
 sr_matrix = sr.analytic_M(random_trans_mat, gamma=gamma)
 

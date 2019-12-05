@@ -27,8 +27,8 @@ square_with_barrier = mm.make_barrier_maze_square(square_maze, \
 
 SR_CELL = int(((B_Y_POSTION + B_THICKNESS + 1) * MAZE_LENGTH) + \
     ((MAZE_LENGTH / 2) - 1))
-RT_SR_CELL = SR_CELL - 19
-LT_SR_CELL = SR_CELL + 20 
+RT_SR_CELL = int(SR_CELL - ((MAZE_LENGTH / 2) -1))
+LT_SR_CELL = int(SR_CELL + (MAZE_LENGTH / 2)) 
 
 # action on 2D maze
 ACTION_UP = 0

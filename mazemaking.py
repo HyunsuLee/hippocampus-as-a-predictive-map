@@ -8,8 +8,8 @@ class Maze():
 
         self.ACTION_LT = 0
         self.ACTION_RT = 1
-
-        self.ACTION_1D = [self.ACTION_LT, self.ACTION_RT]
+        self.ACTION_UP = 2
+        self.ACTION_DW = 3
 
 
     def make_1D(self):
@@ -51,3 +51,18 @@ class Maze():
         else:
             assert False
         return next_state
+
+    def step_2D(self, state, action):
+        i, j = state
+        if action == self.ACTION_LT:
+            next_state = [i, max(j - 1, 0)]
+        elif action == self.ACTION_RT:
+            next_state = [i, min(j + 1, self.x_length -1)]
+        elif action == self.ACTION_UP:
+            next_state = [max(i - 1, 0), j]
+        elif action == self.ACTION_DW:
+            next_state = [min(i + 1, self.y_length -1), j]
+        else:
+            assert False
+        return next_state
+
