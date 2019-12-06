@@ -1,11 +1,12 @@
-import mazemaking as mm
-import sr
+import numpy as np
 
-# maze env
+test_np = np.array([[1, 0,1], [1, 0, 1], [0,0,0], [1,0,1]])
 
-maze = mm.Maze(x_length = 3, y_length=10)
-dmaze = maze.make_1D()
+def remove_zeros(test_np):
+    zero_row_idx = np.argwhere(np.all(test_np == 0, axis = 1))
+    zero_col_idx = np.argwhere(np.all(test_np == 0, axis = 0))
+    test_np = np.delete(test_np, zero_row_idx, axis=0)
+    test_np = np.delete(test_np, zero_col_idx, axis=1)
+    return test_np
 
-random_trans_mat= sr.transition_matrix(dmaze, maze.step_1D, policy=True)
-print(random_trans_mat)
-print(sr.analytic_M(random_trans_mat))
+print(remove_zeros(test_np))

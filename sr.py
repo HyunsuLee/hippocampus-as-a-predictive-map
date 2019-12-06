@@ -21,6 +21,16 @@ def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = 0.1, \
     sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
         gamma * M_next_state_V - M_state_V)
     return sr_matrix
+'''
+def remove_zeros(adj_matrix):
+    zero_row_idx = np.argwhere(np.all(adj_matrix == 0, axis = 1))
+    zero_col_idx = np.argwhere(np.all(adj_matrix == 0, axis = 0))
+    adj_matrix = np.delete(adj_matrix, zero_row_idx, axis=0)
+    adj_matrix = np.delete(adj_matrix, zero_col_idx, axis=1)
+    return adj_matrix
+    # if you remove row & col with zeros of adj_matrix. inverse will be done.
+    # however, the result of SR matrix doesn't fit with reshaping to original maze. 
+'''
 
 # analytic compute SR with transition matrix
 def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
@@ -39,7 +49,10 @@ def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
                 idx_state, idx_next_state = state_to_idx(state, next_state, \
                     all_states)
                 if maze[i_prime, j_prime] == 0:
-                    pass
+                    # with barrier instead of removing the row & col.
+                    # just input very small number, if you don't do that.
+                    # you get NAN matrix of inversing by dividing zero.
+                    adj_matrix[idx_state, idx_next_state] = 1e-18
                 elif policy == "random":
                     adj_matrix[idx_state, idx_next_state] = 1
                 elif policy == "RT":
@@ -49,6 +62,7 @@ def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
                         pass
     end_sr = adj_matrix.shape[0]
     adj_matrix[end_sr-1, end_sr-1] = 0
+
     if policy == "random":
         return adj_matrix/sum(adj_matrix)
     elif policy == "RT":
