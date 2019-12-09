@@ -29,9 +29,9 @@ sqmaze = maze.make_barrier_maze_square()
 
 ACTIONS = [maze.ACTION_LT, maze.ACTION_RT, maze.ACTION_UP, maze.ACTION_DW]
 
-random_trans_mat = sr.transition_matrix(sqmaze, maze.step_2D, ACTION = ACTIONS)
+random_trans_mat, zero_row_idx, zero_col_idx = sr.transition_matrix(sqmaze, maze.step_2D, ACTION = ACTIONS)
 
-sr_matrix = sr.analytic_M(random_trans_mat, gamma = gamma)
+sr_matrix = sr.analytic_M(random_trans_mat, zero_row_idx, zero_col_idx, gamma = gamma)
 
 sr_point = sr_matrix[:, SR_POINT].reshape(sqmaze.shape)
 sr_point = maze.barrier_for_sr_plot(sr_point)

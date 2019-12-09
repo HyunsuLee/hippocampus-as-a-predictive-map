@@ -21,16 +21,21 @@ def update_SR_matrix(state, next_state, sr_matrix, all_states, alpha = 0.1, \
     sr_matrix[idx_state, :] = M_state_V + alpha * (I + \
         gamma * M_next_state_V - M_state_V)
     return sr_matrix
-'''
+
 def remove_zeros(adj_matrix):
     zero_row_idx = np.argwhere(np.all(adj_matrix == 0, axis = 1))
     zero_col_idx = np.argwhere(np.all(adj_matrix == 0, axis = 0))
     adj_matrix = np.delete(adj_matrix, zero_row_idx, axis=0)
     adj_matrix = np.delete(adj_matrix, zero_col_idx, axis=1)
-    return adj_matrix
-    # if you remove row & col with zeros of adj_matrix. inverse will be done.
-    # however, the result of SR matrix doesn't fit with reshaping to original maze. 
-'''
+    return adj_matrix, zero_row_idx, zero_col_idx
+
+def restore_zeros(transition_matrix, zero_row_idx, zero_col_idx):
+    for row_idx in zero_row_idx:
+        transition_matrix = np.insert(transition_matrix, row_idx, [0], axis = 0)
+    for col_idx in zero_col_idx:
+        transition_matrix = np.insert(transition_matrix, col_idx, [0], axis = 1)
+    return transition_matrix
+
 
 # analytic compute SR with transition matrix
 def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
@@ -52,7 +57,8 @@ def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
                     # with barrier instead of removing the row & col.
                     # just input very small number, if you don't do that.
                     # you get NAN matrix of inversing by dividing zero.
-                    adj_matrix[idx_state, idx_next_state] = 1e-18
+                    # adj_matrix[idx_state, idx_next_state] = 1e-18
+                    adj_matrix[idx_state, idx_next_state] = 0
                 elif policy == "random":
                     adj_matrix[idx_state, idx_next_state] = 1
                 elif policy == "RT":
@@ -62,13 +68,15 @@ def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
                         pass
     end_sr = adj_matrix.shape[0]
     adj_matrix[end_sr-1, end_sr-1] = 0
+    adj_matrix, zero_row_idx, zero_col_idx = remove_zeros(adj_matrix)
 
     if policy == "random":
-        return adj_matrix/sum(adj_matrix)
+        return adj_matrix/sum(adj_matrix), zero_row_idx, zero_col_idx
     elif policy == "RT":
-        return adj_matrix
+        return adj_matrix, zero_row_idx, zero_col_idx
 
-def analytic_M(transition_matrix, gamma = 0.9):
+def analytic_M(transition_matrix, zero_row_idx, zero_col_idx, gamma = 0.9):
+    transition_matrix = restore_zeros(transition_matrix, zero_row_idx, zero_col_idx)
     identity_matrix = np.eye(transition_matrix.shape[0])
     sr_matrix = np.linalg.inv(identity_matrix - (gamma * transition_matrix))
     return sr_matrix
