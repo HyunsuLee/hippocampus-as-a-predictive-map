@@ -7,3 +7,4 @@
 ## Description of py
 
 1. figure2C.py : replicate figure2C, 1D maze result
+2. figure2C_low2D.py : replicate figure2C, 2D maze result
