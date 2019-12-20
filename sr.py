@@ -54,10 +54,6 @@ def transition_matrix(maze, step, ACTION=[0,1], policy = "random"):
                 idx_state, idx_next_state = state_to_idx(state, next_state, \
                     all_states)
                 if maze[i_prime, j_prime] == 0:
-                    # with barrier instead of removing the row & col.
-                    # just input very small number, if you don't do that.
-                    # you get NAN matrix of inversing by dividing zero.
-                    # adj_matrix[idx_state, idx_next_state] = 1e-18
                     adj_matrix[idx_state, idx_next_state] = 0
                 elif policy == "random":
                     adj_matrix[idx_state, idx_next_state] = 1

@@ -21,13 +21,9 @@ SR_POINT = int(MAZE_LENGTH * 0.50)
 X_LT = int(MAZE_LENGTH * 0.3)
 X_RT = int(MAZE_LENGTH * 0.7)
 
+maze = mm.Maze(x_length=300)
 
-maze = mm.make_1D(MAZE_LENGTH)
-
-# action on 1D maze
-ACTION_LT = 0
-ACTION_RT = 1
-ACTIONS = [ACTION_LT, ACTION_RT]
+dmaze = maze.make_1D()
 
 # state information
 START = [0, 0]
@@ -37,19 +33,6 @@ END = [0, MAZE_LENGTH - 1]
 alpha = 0.1
 gamma = 0.9 # p.8 of supplement
 
-# make actions and receive reward
-def step(state, action):
-    i, j = state
-    if action == ACTION_LT:
-        next_state = [i, max(j - 1, 0)]
-    elif action == ACTION_RT:
-        next_state = [i, min(j + 1, MAZE_LENGTH - 1)]
-    else:
-        assert False
-    
-    reward = 0
-
-    return next_state, reward
 
 # action policy
 def choose_action(state, prefered = True):
@@ -64,7 +47,7 @@ def choose_action(state, prefered = True):
 
 
 # prepare for SR matrix
-all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
+all_states = [[x, y] for x in range(dmaze.shape[0]) for y in range(dmaze.shape[1])]
 
 
 #sr_matrix = np.eye(len(all_states), dtype=np.float)
@@ -79,7 +62,7 @@ for idx in tqdm(range(len(prefer_))):
         while state != END:
             action = choose_action(state, prefered=prefer_[idx])
         
-            next_state, _ = step(state, action)
+            next_state = maze.step_1D(state, action)
             sr_matrix = sr.update_SR_matrix(state, next_state, sr_matrix, \
                  all_states, alpha = alpha, gamma = gamma)
             state = next_state

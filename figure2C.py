@@ -17,9 +17,9 @@ gamma = 0.84
 maze = mm.Maze(x_length = MAZE_LENGTH)
 dmaze = maze.make_1D()
 
-random_trans_mat= sr.transition_matrix(dmaze, maze.step_1D, policy="RT")
+random_trans_mat, zero_row_idx, zero_col_idx= sr.transition_matrix(dmaze, maze.step_1D, policy="RT")
 
-sr_matrix = sr.analytic_M(random_trans_mat, gamma=gamma)
+sr_matrix = sr.analytic_M(random_trans_mat, zero_row_idx, zero_col_idx, gamma=gamma)
 
 def figure_matrix():  
     fig, ax = plt.subplots() 

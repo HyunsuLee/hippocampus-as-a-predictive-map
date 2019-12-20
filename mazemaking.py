@@ -15,7 +15,11 @@ class Maze():
         self.b_length = b_length
         self.b_thickness = b_thickness
         self.b_x_position = b_x_position
-        self.b_y_position = b_y_position 
+        self.b_y_position = b_y_position
+
+        self.barrier = [[x, y] for x in range(self.b_y_position, self.b_y_position \
+             + self.b_thickness) for y in range(self.b_x_position, \
+                 self.b_x_position + self.b_length)] 
 
     def make_1D(self):
         return np.ones((1, self.x_length))
@@ -73,5 +77,8 @@ class Maze():
             next_state = [min(i + 1, self.y_length -1), j]
         else:
             assert False
+        if next_state in self.barrier:
+            next_state = state
+            
         return next_state
 

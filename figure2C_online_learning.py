@@ -18,7 +18,8 @@ MAZE_LENGTH = 50 # p.8 of supplement,
 # 50 states shows similar results with the figure 2C.
 SR_POINT = int(MAZE_LENGTH * 0.75)
 
-maze = mm.make_1D(MAZE_LENGTH)
+maze = mm.Maze(x_length = MAZE_LENGTH)
+dmaze = maze.make_1D()
 
 # action on 1D maze
 ACTION_LT = 0
@@ -35,22 +36,10 @@ gamma = 0.84 # p.8 of supplement
 # the paper said that 0.084 gamma was used for 1D maze,
 # 0.84 gamma shows similar results. With smaller gamma, the sharper SR rate shows.
 
-# make actions and receive reward
-def step(state, action):
-    i, j = state
-    if action == ACTION_LT:
-        next_state = [i, max(j - 1, 0)]
-    elif action == ACTION_RT:
-        next_state = [i, min(j + 1, MAZE_LENGTH - 1)]
-    else:
-        assert False
-    
-    reward = 0
 
-    return next_state, reward
 
 # prepare for SR matrix
-all_states = [[x, y] for x in range(maze.shape[0]) for y in range(maze.shape[1])]
+all_states = [[x, y] for x in range(dmaze.shape[0]) for y in range(dmaze.shape[1])]
 
 sr_matrix = np.eye(len(all_states), dtype=np.float)
 
@@ -65,7 +54,7 @@ for i in tqdm(range(1001)):
     
     while state != END:
         action = ACTION_RT 
-        next_state, _ = step(state, action)
+        next_state = maze.step_1D(state, action)
         sr_matrix = sr.update_SR_matrix(state, next_state, sr_matrix, \
              all_states, alpha = alpha, gamma = gamma)
 
@@ -88,7 +77,7 @@ def figure_matrix():
     however too many cells are drawn to annotate each probability.
     '''        
     fig.tight_layout()
-    plt.savefig('./images/sr_matrix_' + str(MAZE_LENGTH) + '.png')
+    plt.savefig('./images/figure2C_1D_online_SRmatrix.png')
     plt.close()
 
 def figure_history():
@@ -104,7 +93,7 @@ def figure_history():
             for_legend.append("10^"+str(idx-1))
     plt.legend(for_legend, loc = 'upper left')
     # plt.savefig('./images/sr_histroy_' + str(MAZE_LENGTH) + '.png')
-    plt.savefig('./images/figure2c.png')
+    plt.savefig('./images/figure2c_online.png')
 
 if __name__=='__main__':
     figure_matrix()

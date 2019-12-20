@@ -10,61 +10,39 @@ import sr
 
 # maze env
 
-MAZE_LENGTH = 40
+MAZE_X_LENGTH = 40
+MAZE_Y_LENGTH = 40
 
-square_maze = mm.square_maze(MAZE_LENGTH)
 
 # put barrier
 B_LENGTH = 20
 B_THICKNESS = 1
 B_X_POSTION = 10
-B_Y_POSTION = 19 
-barriers = [[x, y] for x in range(B_Y_POSTION, B_Y_POSTION + B_THICKNESS) \
-     for y in range(B_X_POSTION, B_X_POSTION + B_LENGTH)]
+B_Y_POSTION = 19
 
-square_with_barrier = mm.make_barrier_maze_square(square_maze, \
-    B_LENGTH, B_X_POSTION, B_Y_POSTION, B_THICKNESS)
 
-SR_CELL = int(((B_Y_POSTION + B_THICKNESS + 1) * MAZE_LENGTH) + \
-    ((MAZE_LENGTH / 2) - 1))
-RT_SR_CELL = int(SR_CELL - ((MAZE_LENGTH / 2) -1))
-LT_SR_CELL = int(SR_CELL + (MAZE_LENGTH / 2)) 
+maze = mm.Maze(x_length = MAZE_X_LENGTH, y_length = MAZE_Y_LENGTH, \
+    b_length = B_LENGTH, b_thickness = B_THICKNESS, b_x_position = B_X_POSTION, \
+        b_y_position = B_Y_POSTION)
+
+square_with_barrier = maze.make_barrier_maze_square()
+
+SR_CELL = int(((B_Y_POSTION + B_THICKNESS + 1) * MAZE_Y_LENGTH) + \
+    ((MAZE_X_LENGTH / 2) - 1))
+RT_SR_CELL = int(SR_CELL - ((MAZE_X_LENGTH / 2) -1))
+LT_SR_CELL = int(SR_CELL + (MAZE_X_LENGTH / 2)) 
 
 # action on 2D maze
-ACTION_UP = 0
-ACTION_RT = 1
-ACTION_DW = 2
-ACTION_LT = 3
-
-ACTIONS = [ACTION_UP, ACTION_RT, ACTION_DW, ACTION_LT]
+ACTIONS = [maze.ACTION_LT, maze.ACTION_RT, maze.ACTION_UP, maze.ACTION_DW]
 
 # state information
 START = [0, 0]
-END = [MAZE_LENGTH - 1, MAZE_LENGTH - 1]
+END = [MAZE_Y_LENGTH - 1, MAZE_X_LENGTH - 1]
 
 # hyperparameter for updating SR matrix
 alpha = 0.1
 gamma = 0.99 # original parameter 0.13
 
-# make actions and receive reward
-def step(state, action):
-    i, j = state
-    if action == ACTION_LT:
-        next_state = [i, max(j - 1, 0)]
-    elif action == ACTION_RT:
-        next_state = [i, min(j + 1, MAZE_LENGTH - 1)]
-    elif action == ACTION_UP:
-        next_state = [max(i - 1, 0), j]
-    elif action == ACTION_DW:
-        next_state = [min(i + 1, MAZE_LENGTH -1), j]
-    else:
-        assert False
-    if next_state in barriers:
-        next_state = state
-    
-    reward = 0
-
-    return next_state, reward
 
 # action policy
 def choose_action(state):
@@ -90,7 +68,7 @@ for i in tqdm(range(1001)):
     
     while state != END:
         action = choose_action(state)
-        next_state, _ = step(state, action)
+        next_state = maze.step_2D(state, action)
         sr_matrix = sr.update_SR_matrix(state, next_state, sr_matrix, \
              all_states, alpha = alpha, gamma = gamma)
 
@@ -104,14 +82,13 @@ for i in tqdm(range(1001)):
 sr_point = copy.deepcopy(sr_matrix[:, SR_CELL])
 sr_point = sr_point.reshape(square_with_barrier.shape)
 
-sr_point_with_barrier = mm.make_barrier_maze_square(sr_point, \
-    B_LENGTH, B_X_POSTION, B_Y_POSTION, B_THICKNESS, for_sr = True)   
+sr_point_with_barrier = maze.barrier_for_sr_plot(sr_point)   
  
 def figure2c_2D():
     fig, ax = plt.subplots() 
     ax.imshow(sr_point_with_barrier, cmap='viridis', interpolation='nearest')
     fig.tight_layout()
-    plt.savefig('./images/figure2c_2D_99.png')
+    plt.savefig('./images/figure2c_2D_online.png')
     plt.close()
 
 
@@ -124,11 +101,11 @@ def figure_history():
         else:
             for_legend.append("10^"+str(idx-1))
     plt.legend(for_legend, loc = 'upper left')
-    plt.savefig('./images/figure2c_2D_history.png')
+    plt.savefig('./images/figure2c_2D_online_history.png')
 
 
 
 if __name__=='__main__':
-    # figure2c_2D()
+    figure2c_2D()
     figure_history()
 
